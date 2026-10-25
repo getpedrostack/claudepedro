@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "music21": {
+      "command": "node",
+      "args": [".claude/mcp/launch.mjs", "music21"]
+    },
+    "philosophy": {
+      "command": "node",
+      "args": [".claude/mcp/launch.mjs", "philosophy"]
+    }
+  }
+}

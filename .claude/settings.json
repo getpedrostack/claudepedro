@@ -1,0 +1,30 @@
+{
+  "env": {
+    "SUPERPOWERS_DISABLE_TELEMETRY": "1"
+  },
+  "extraKnownMarketplaces": {
+    "superpowers-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers-marketplace"
+      }
+    }
+  },
+  "enabledMcpjsonServers": ["music21", "philosophy"],
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh",
+            "timeout": 600
+          }
+        ]
+      }
+    ]
+  }
+}
