@@ -1,0 +1,13 @@
+diff --git a/src/index.ts b/src/index.ts
+index 13d285e..3504a62 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -190,6 +190,8 @@ async function openAlexSearch(
+     "id,title,publication_year,authorships,doi,locations,abstract_inverted_index",
+   );
+   url.searchParams.set("mailto", MAILTO);
++  // OpenAlex exige chave (gratuita) desde 2025; sem ela, a cota diaria e dividida por IP.
++  if (process.env.OPENALEX_API_KEY) url.searchParams.set("api_key", process.env.OPENALEX_API_KEY);
+ 
+   const data: any = await httpRequest(url.toString(), (r) => r.json());
+   const total: number = data?.meta?.count ?? 0;

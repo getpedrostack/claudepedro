@@ -24,13 +24,24 @@ install_music21() {
   fi
 }
 
+# Patches nossos sobre o commit auditado (versionados em patches/, aplicados em ordem).
+PATCHES=("$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"/patches/philosophy-*.patch)
+
 install_philosophy() {
   if [ ! -d "$PHILO_DIR/.git" ]; then
     git init -q "$PHILO_DIR" && git -C "$PHILO_DIR" remote add origin https://github.com/sea9401/philosophy-mcp.git || return 1
   fi
-  if [ "$(git -C "$PHILO_DIR" rev-parse HEAD 2>/dev/null)" != "$PHILO_SHA" ] || [ ! -f "$PHILO_JS" ]; then
-    git -C "$PHILO_DIR" fetch -q --depth 1 origin "$PHILO_SHA" &&
-    git -C "$PHILO_DIR" checkout -q "$PHILO_SHA" &&
+  local stale=0 p
+  [ "$(git -C "$PHILO_DIR" rev-parse HEAD 2>/dev/null)" = "$PHILO_SHA" ] && [ -f "$PHILO_JS" ] || stale=1
+  for p in "${PATCHES[@]}"; do   # patch ainda nao aplicado => reinstala
+    [ -f "$p" ] && ! git -C "$PHILO_DIR" apply --check --reverse "$p" 2>/dev/null && stale=1
+  done
+  if [ $stale = 1 ]; then
+    { git -C "$PHILO_DIR" fetch -q --depth 1 origin "$PHILO_SHA" || [ "$(git -C "$PHILO_DIR" rev-parse HEAD 2>/dev/null)" = "$PHILO_SHA" ]; } &&
+    git -C "$PHILO_DIR" checkout -q -f "$PHILO_SHA" || return 1
+    for p in "${PATCHES[@]}"; do
+      [ -f "$p" ] && { git -C "$PHILO_DIR" apply "$p" || return 1; }
+    done
     (cd "$PHILO_DIR" && npm install --no-audit --no-fund --loglevel=error) >&2 || return 1   # "prepare" ja roda o build
   fi
   [ -f "$PHILO_JS" ]

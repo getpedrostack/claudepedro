@@ -3,16 +3,19 @@
     "SUPERPOWERS_DISABLE_TELEMETRY": "1"
   },
   "extraKnownMarketplaces": {
-    "superpowers-marketplace": {
+    "claudepedro": {
       "source": {
-        "source": "github",
-        "repo": "obra/superpowers-marketplace"
+        "source": "directory",
+        "path": "./.claude/marketplace"
       }
     }
   },
-  "enabledMcpjsonServers": ["music21", "philosophy"],
+  "enabledMcpjsonServers": [
+    "music21",
+    "philosophy"
+  ],
   "enabledPlugins": {
-    "superpowers@superpowers-marketplace": true
+    "superpowers@claudepedro": true
   },
   "hooks": {
     "SessionStart": [

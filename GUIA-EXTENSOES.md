@@ -7,7 +7,7 @@ cabeçalho de `scripts/instalar-extensoes-claude.ps1`).
 |---|---|---|
 | `d3-viz` | skill | gráficos interativos sob medida com d3.js (rede, mapa, heatmap, chord etc.) |
 | `webapp-testing` | skill | abrir um site/app local num navegador de verdade (Playwright), clicar, tirar print, ler o console |
-| `superpowers` | plugin (conjunto de skills) | método de trabalho: brainstorming antes de criar, TDD, depuração sistemática, planos |
+| `superpowers` | plugin (conjunto de skills), fixado na v7.0.1 (commit `2ce8aa1`) | método de trabalho: brainstorming antes de criar, TDD, depuração sistemática, planos |
 | `music21` | servidor MCP | análise musical: tonalidade, acordes, harmonia, condução de vozes, contraponto |
 | `philosophy` | servidor MCP | pesquisa acadêmica: PhilPapers, Stanford Encyclopedia (SEP), OpenAlex, Gutenberg, Wikisource |
 
@@ -59,19 +59,24 @@ Para servidores MCP não existe atalho com `/`: basta citar o assunto ("use o mu
   container e cerca de 6 s depois disso.
 - `.claude/settings.json`: registra o hook, aprova os dois servidores e desliga a telemetria do
   superpowers (`SUPERPOWERS_DISABLE_TELEMETRY=1`).
+- `.claude/marketplace/`: marketplace próprio que fixa o superpowers no commit revisado. O
+  marketplace original segue sempre a versão mais nova, sem revisão. Para atualizar, revise o
+  commit novo e troque o `sha` nesse arquivo; o hook reinstala sozinho.
 
-**Atenção:** na nuvem, o servidor `philosophy` instala e inicia, mas a rede padrão do ambiente
-bloqueia as fontes de pesquisa. Para liberar, abra o menu do ambiente na barra de título da
-sessão → **Edit** → **Network access** e adicione em *Allowed domains* (deixe marcada a opção
-de gerenciadores de pacotes):
+**Rede liberada (25/10/2026)**: o servidor `philosophy` já funciona com SEP, Gutenberg,
+Wikisource, Open Library e Internet Archive. O lançador liga `NODE_USE_ENV_PROXY=1` quando há
+proxy, porque sem isso o `fetch` do Node ignora o proxy da nuvem e toda busca falha.
 
-```
-philpapers.org  philarchive.org  plato.stanford.edu  api.openalex.org  archive.org
-openlibrary.org  gutendex.com  www.gutenberg.org  directory.doabooks.org  *.wikisource.org
-```
+O que ainda não funciona na nuvem, e por quê:
 
-As ferramentas `fetch_pdf` e `fetch_text` baixam URLs arbitrárias e só funcionam com acesso
-total à rede. Passo a passo oficial: https://code.claude.com/docs/en/cloud-environments#network-access
+| Ferramenta | Situação | Motivo / solução |
+|---|---|---|
+| `search_papers`, `research` (OpenAlex) | precisa de chave | A API agora exige chave gratuita; sem ela, a cota diária é dividida por IP e se esgota. Crie a chave em https://openalex.org (conta grátis) e cadastre no ambiente como variável **`OPENALEX_API_KEY`** (menu do ambiente na barra de título → **Edit** → variáveis de ambiente). Nunca cole a chave no chat. Vale a partir da sessão seguinte. |
+| `get_paper`, `list_recent`, PDFs do PhilArchive | bloqueado pelo site | PhilPapers/PhilArchive (Cloudflare) recusa IPs de datacenter. No seu Windows funciona. |
+| `search_doab` | bloqueado pelo site | O DOAB também recusa IPs de datacenter. No seu Windows funciona. |
+
+O suporte a `OPENALEX_API_KEY` não existe no servidor original: é um patch de 2 linhas,
+versionado em `.claude/mcp/patches/` e aplicado pelo `install.sh` sobre o commit auditado.
 
 ### No seu Windows
 

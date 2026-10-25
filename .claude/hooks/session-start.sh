@@ -30,16 +30,32 @@ else
   fi
 fi
 
-# ---------- 3. Plugin superpowers ----------
+# ---------- 3. Plugin superpowers (fixado em .claude/marketplace) ----------
 # .claude/settings.json ja declara o marketplace e habilita o plugin, mas sessoes sem
 # interacao nao baixam plugins sozinhas; instalar aqui garante que ele esteja la.
-if claude plugin list 2>/dev/null | grep -q 'superpowers@superpowers-marketplace'; then
-  log "superpowers: OK"
-elif (claude plugin marketplace add obra/superpowers-marketplace >/dev/null 2>&1 || true) &&
-     claude plugin install superpowers@superpowers-marketplace >/dev/null 2>&1; then
+SP=superpowers@claudepedro
+SP_SHA=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["plugins"][0]["source"]["sha"])' "$DIR/marketplace/.claude-plugin/marketplace.json")
+installed_sha() {
+  python3 - "$SP" <<'EOF' 2>/dev/null
+import json, os, sys
+d = json.load(open(os.path.expanduser("~/.claude/plugins/installed_plugins.json")))
+print(next((e.get("gitCommitSha", "") for e in d.get("plugins", {}).get(sys.argv[1], [])), ""))
+EOF
+}
+if [ "$(installed_sha)" = "$SP_SHA" ]; then
   log "superpowers: OK"
 else
-  log "superpowers: FALHOU"
+  for sc in user project; do   # versao sem fixar, de antes
+    claude plugin uninstall --scope "$sc" superpowers@superpowers-marketplace >/dev/null 2>&1
+  done
+  claude plugin marketplace add "$DIR/marketplace" >/dev/null 2>&1
+  claude plugin marketplace update claudepedro >/dev/null 2>&1
+  claude plugin uninstall "$SP" >/dev/null 2>&1
+  if claude plugin install "$SP" >/dev/null 2>&1 && [ "$(installed_sha)" = "$SP_SHA" ]; then
+    log "superpowers: OK"
+  else
+    log "superpowers: FALHOU"
+  fi
 fi
 
 exit 0

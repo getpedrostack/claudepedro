@@ -44,6 +44,10 @@ if (!existsSync(server.file)) {
 const [cmd, args] = name === 'philosophy'
   ? [process.execPath, [server.file, ...server.args]]
   : [server.file, server.args];
-const child = spawn(cmd, args, { stdio: 'inherit' });
+// O fetch nativo do Node ignora HTTPS_PROXY sem esta variavel (Node >= 22.21); sem ela,
+// atras do proxy das sessoes na nuvem, toda busca do philosophy falha com "fetch failed".
+const env = { ...process.env };
+if (env.HTTPS_PROXY || env.https_proxy) env.NODE_USE_ENV_PROXY ??= '1';
+const child = spawn(cmd, args, { stdio: 'inherit', env });
 for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => child.kill(sig));
 child.on('exit', (code, sig) => process.exit(sig ? 1 : code ?? 0));

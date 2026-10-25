@@ -1,0 +1,20 @@
+{
+  "name": "claudepedro",
+  "owner": { "name": "getpedrostack" },
+  "metadata": {
+    "description": "Plugins de terceiros fixados nos commits revisados (o marketplace original segue a ponta da branch)."
+  },
+  "plugins": [
+    {
+      "name": "superpowers",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/obra/superpowers.git",
+        "sha": "2ce8aa15d05bd57213e6f746f953aafb7ded7a8b"
+      },
+      "description": "Skills de metodo (brainstorming, TDD, depuracao sistematica, planos) - v7.0.1, revisado em 25/10/2026",
+      "version": "7.0.1",
+      "strict": true
+    }
+  ]
+}
